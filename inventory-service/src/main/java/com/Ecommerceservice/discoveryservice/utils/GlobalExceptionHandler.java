@@ -1,4 +1,4 @@
-package com.Ecommerceservice.inventoryservice.utils;
+package com.Ecommerceservice.discoveryservice.utils;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

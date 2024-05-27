@@ -1,18 +1,15 @@
-package com.Ecommerceservice.inventoryservice.service;
-import com.Ecommerceservice.inventoryservice.dto.InventoryRequest;
-import com.Ecommerceservice.inventoryservice.dto.InventoryResponse;
-import com.Ecommerceservice.inventoryservice.model.Inventory;
+package com.Ecommerceservice.discoveryservice.service;
+import com.Ecommerceservice.discoveryservice.dto.InventoryRequest;
+import com.Ecommerceservice.discoveryservice.dto.InventoryResponse;
+import com.Ecommerceservice.discoveryservice.model.Inventory;
 import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.Ecommerceservice.inventoryservice.repository.InventoryRepository;
+import com.Ecommerceservice.discoveryservice.repository.InventoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -22,19 +19,21 @@ public class InventoryService {
     private static final Logger log = LoggerFactory.getLogger(InventoryService.class);
     private final InventoryRepository inventoryRepository;
 
-    @Transactional
-    public boolean isInStock(String skuCode){
-        try{
-            List<Inventory> SkuList= inventoryRepository.findByskuCode(skuCode);
-            boolean inStock = !SkuList.isEmpty();
-            log.info("Checked inventory exist in SKU {}: {}", skuCode, inStock ? "In Stock" : "Out of Stock");
-            return inStock;
-        }
-        catch(Exception e){
-            log.error("Error checking inventory exist in SKU {}: {}", skuCode, e.getMessage(), e);
-            return false;
-        }
-    }
+//    @Transactional
+//    public List<InventoryResponse> isInStock(List<String> skuCode){
+//        try{
+//            List<Inventory> SkuList= inventoryRepository.findBySkuCodeIn(skuCode);
+//            //Assume we have such Inventory(sku) in DB:
+//            List<InventoryResponse> responseList = SkuList.stream().map( inventory -> InventoryResponse.builder().skuCode(inventory.getSkuCode())
+//                    .quantity(inventory.getQuantity()).isInStock(inventory.getQuantity()>0).build()).toList();
+//
+//            log.info("Check Inventory exist in Inventory - {}" , responseList);
+//            return responseList;
+//        }
+//        catch(Exception e){
+//            throw new ServiceException("Failed to check if inventory is in stock from database");
+//        }
+//    }
 
     @Transactional
     public List<InventoryResponse> getAllInventory(){
@@ -50,15 +49,21 @@ public class InventoryService {
     }
 
     @Transactional
-    public List<InventoryResponse> getInventoryBySku(String skuCode){
+    public List<InventoryResponse> getInventoryBySku(List<String> skuCode){
         try{
-            List<Inventory> inventoryList = inventoryRepository.findByskuCode(skuCode);
-            log.info("Checked inventory List for SKU {}", skuCode);
-            return inventoryList.stream().map(this::mapToDto).toList();
+            List<Inventory> inventoryList = inventoryRepository.findBySkuCodeIn(skuCode);
+            log.info("Checked inventory List by SKU");
+            List<Inventory> SkuList= inventoryRepository.findBySkuCodeIn(skuCode);
+            //Assume we have such Inventory(sku) in DB:
+            List<InventoryResponse> responseList = SkuList.stream().map( inventory -> InventoryResponse.builder().skuCode(inventory.getSkuCode())
+                    .quantity(inventory.getQuantity()).isInStock(inventory.getQuantity()>0).build()).toList();
+            //Assume some of the skuCode not in DB :
+//            skuCode.stream().map(sku -> )
+            return responseList;
         }
         catch(Exception e){
-            log.error("Error occurs Checked inventory List for SKU {},", skuCode, e);
-            throw new ServiceException("Failed to fetch inventory for SKU" + skuCode);
+            log.error("Error occurs Checked inventory List for SKU {}", e.getMessage());
+            throw new ServiceException("Failed to fetch inventory for SKU");
         }
     }
 

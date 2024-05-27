@@ -1,14 +1,12 @@
-package com.Ecommerceservice.inventoryservice.controller;
+package com.Ecommerceservice.discoveryservice.controller;
 
-import com.Ecommerceservice.inventoryservice.dto.InventoryRequest;
-import com.Ecommerceservice.inventoryservice.dto.InventoryResponse;
-import com.Ecommerceservice.inventoryservice.model.Inventory;
-import com.Ecommerceservice.inventoryservice.service.InventoryService;
+import com.Ecommerceservice.discoveryservice.dto.InventoryRequest;
+import com.Ecommerceservice.discoveryservice.dto.InventoryResponse;
+import com.Ecommerceservice.discoveryservice.service.InventoryService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,24 +20,32 @@ import java.util.List;
 public class InventoryController {
     private final InventoryService inventoryService;
 
-    @GetMapping("/isInStock")
-    @ResponseStatus(HttpStatus.OK)
-    public boolean isInStock(@RequestParam("sku") String skuCode ){
-        return inventoryService.isInStock(skuCode);
-    }
+//    @GetMapping("/isInStock")
+//    @ResponseStatus(HttpStatus.OK)
+//    public ResponseEntity<List<InventoryResponse>> isInStock(@RequestParam("sku") List<String> skuCode ){
+//        if(skuCode ==null || skuCode.isEmpty()){
+//            return ResponseEntity.badRequest().build();
+//        }
+//        List<InventoryResponse> inventoryResponseList = inventoryService.getInventoryBySku(skuCode);
+//        return
+//
+//    }
 
-    @GetMapping
+    @GetMapping("/getInventoryBySku")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<InventoryResponse>> getInventoryBySku(
-            @RequestParam(value = "sku", required = false) String skuCode){
+            @RequestParam(value = "sku", required = true) List<String> skuCode){
         List<InventoryResponse> inventoryResponseList = new ArrayList<InventoryResponse>();
-        if(skuCode==null || skuCode.trim().isEmpty()){
-            inventoryResponseList = inventoryService.getAllInventory();
+        inventoryResponseList = inventoryService.getInventoryBySku(skuCode);
+        if(inventoryResponseList.isEmpty()){
+            return ResponseEntity.notFound().build();
         }
-        else{
-            inventoryResponseList = inventoryService.getInventoryBySku(skuCode);
-        }
-
+        return ResponseEntity.ok(inventoryResponseList);
+    }
+    @GetMapping("/getAllInventory")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<InventoryResponse>> getAllInventory(){
+        List<InventoryResponse>inventoryResponseList = inventoryService.getAllInventory();
         if(inventoryResponseList.isEmpty()){
             return ResponseEntity.notFound().build();
         }

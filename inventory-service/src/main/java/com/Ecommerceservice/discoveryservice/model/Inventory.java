@@ -1,4 +1,4 @@
-package com.Ecommerceservice.inventoryservice.model;
+package com.Ecommerceservice.discoveryservice.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
