@@ -28,7 +28,9 @@ stages:          # List of stages for jobs, and their order of execution
   - deploy
 
 variables:
-  AVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version --no-transfer-progress"
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version --no-transfer-progress"
   DOCKER_IMAGE: "$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHORT_SHA"
 
 
