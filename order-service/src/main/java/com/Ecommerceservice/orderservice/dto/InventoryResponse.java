@@ -1,4 +1,4 @@
-package com.Ecommerceservice.discoveryservice.dto;
+package com.Ecommerceservice.orderservice.dto;
 
 import lombok.*;
 
@@ -12,4 +12,5 @@ public class InventoryResponse {
     private String skuCode;
     private Boolean isInStock;
     private Integer quantity;
+    private String errorMessage;
 }

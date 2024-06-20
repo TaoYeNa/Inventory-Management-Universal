@@ -1,12 +1,20 @@
 package com.Ecommerceservice.orderservice.service;
 
-import com.Ecommerceservice.discoveryservice.dto.InventoryResponse;
+import com.Ecommerceservice.orderservice.dto.InventoryResponse;
+import com.Ecommerceservice.orderservice.config.feignClient;
 import com.Ecommerceservice.orderservice.dto.OrderLineItemsDto;
 import com.Ecommerceservice.orderservice.dto.OrderRequest;
+import com.Ecommerceservice.orderservice.exception.InsufficientInventoryException;
 import com.Ecommerceservice.orderservice.model.Order;
 import com.Ecommerceservice.orderservice.model.OrderLineItems;
 import com.Ecommerceservice.orderservice.repository.OrderRepository;
+import feign.FeignException;
+import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -18,7 +26,8 @@ import java.util.stream.Collectors;
 
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
+    private final feignClient inventoryClient;
     public Order placeOrder(OrderRequest orderRequest){
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
@@ -27,25 +36,19 @@ public class OrderService {
         ).toList();
         order.setOrderLineItemsList(orderLineItemsList);
         List<String> skuList = order.getOrderLineItemsList().stream().map(item-> item.getSkuCode()).toList();
-
-        //call inventory service, and place order if product is in stock
-        InventoryResponse[] inventoryResponsesArray  = webClient.get().uri("http://localhost:8082/api/inventory/getInventoryBySku", uriBuilder -> uriBuilder.queryParam("sku", skuList).build()).retrieve()
-                .bodyToMono(InventoryResponse[].class).block();
-
-        assert inventoryResponsesArray != null;
+        InventoryResponse[] inventoryResponsesArray = inventoryClient.getInventoryBySku(skuList);
         boolean allProductsInStock = Arrays.stream(inventoryResponsesArray).allMatch(InventoryResponse::getIsInStock);
-
-
-        if(allProductsInStock){
-            orderRepository.save(order);
+        if (inventoryResponsesArray.length > 0 && inventoryResponsesArray[0].getErrorMessage() != null) {
+            throw new InsufficientInventoryException("No such SKU code in Inventory, Please try again later");
         }
-        else{
+        if (allProductsInStock) {
+            orderRepository.save(order);
+        } else {
             throw new IllegalArgumentException("Some Product is not in Stock, Please try again later");
         }
-
-
         return order;
     }
+
 
     public List<OrderLineItemsDto> getItemsByOrderId(Long orderId){
         return orderRepository.findById(orderId)

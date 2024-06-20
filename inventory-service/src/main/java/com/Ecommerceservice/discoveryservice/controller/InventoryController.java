@@ -12,6 +12,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -38,7 +40,9 @@ public class InventoryController {
         List<InventoryResponse> inventoryResponseList = new ArrayList<InventoryResponse>();
         inventoryResponseList = inventoryService.getInventoryBySku(skuCode);
         if(inventoryResponseList.isEmpty()){
-            return ResponseEntity.notFound().build();
+            InventoryResponse errorResponse = new InventoryResponse();
+            errorResponse.setErrorMessage("No inventory available for the provided SKU code");
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Collections.singletonList(errorResponse));
         }
         return ResponseEntity.ok(inventoryResponseList);
     }
@@ -50,6 +54,12 @@ public class InventoryController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(inventoryResponseList);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public String test(){
+        return " get method working";
     }
 
     @PostMapping
