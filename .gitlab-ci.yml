@@ -16,7 +16,7 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-image: docker:19.03.12
+image: maven:3.8.6-openjdk-18
 
 services:
   - docker:dind
