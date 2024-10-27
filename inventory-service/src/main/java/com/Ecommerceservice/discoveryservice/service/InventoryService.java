@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,8 @@ public class InventoryService {
 //        }
 //    }
 
+
+
     @Transactional
     public List<InventoryResponse> getAllInventory(){
         try{
@@ -49,9 +53,21 @@ public class InventoryService {
     }
 
     @Transactional
+    public Map<String, Double> getPricesBySku(List<String> skuCode){
+        try{
+            List<Inventory> inventories = inventoryRepository.findBySkuCodeIn(skuCode);
+            return inventories.stream().collect(Collectors.toMap(Inventory::getSkuCode, Inventory::getPrice));
+        }
+        catch (Exception e){
+            log.error("Error occurs Checked inventory List for SKU {}", e.getMessage());
+            throw new ServiceException("Failed to fetch inventory for SKU");
+        }
+    }
+
+    @Transactional
     public List<InventoryResponse> getInventoryBySku(List<String> skuCode){
         try{
-            List<Inventory> inventoryList = inventoryRepository.findBySkuCodeIn(skuCode);
+//            List<Inventory> inventoryList = inventoryRepository.findBySkuCodeIn(skuCode);
             log.info("Checked inventory List by SKU");
             List<Inventory> SkuList= inventoryRepository.findBySkuCodeIn(skuCode);
             //Assume we have such Inventory(sku) in DB:

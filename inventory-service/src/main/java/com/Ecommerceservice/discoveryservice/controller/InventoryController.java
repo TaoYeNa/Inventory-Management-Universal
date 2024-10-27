@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/inventory")
@@ -46,6 +43,15 @@ public class InventoryController {
         }
         return ResponseEntity.ok(inventoryResponseList);
     }
+
+    @GetMapping("/getPricesBySku")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Map<String, Double>> getPricesBySku(@RequestParam(required = true) List<String> skuCodes) {
+        Map<String, Double> prices = inventoryService.getPricesBySku(skuCodes);
+        return ResponseEntity.ok(prices);
+    }
+
+
     @GetMapping("/getAllInventory")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<InventoryResponse>> getAllInventory(){

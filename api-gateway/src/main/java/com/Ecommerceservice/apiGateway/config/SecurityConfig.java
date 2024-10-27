@@ -14,11 +14,21 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     @Bean
+    //Oauth2 Code:
+//    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+//        return http.csrf(ServerHttpSecurity.CsrfSpec::disable) // Using the Consumer functional interface to disable CSRF
+//                .authorizeExchange(exchanges -> exchanges
+//                        .pathMatchers("/eureka/**").permitAll() // Permit all requests to "/eureka/**"
+//                        .anyExchange().authenticated() // All other requests must be authenticated
+//                ).oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults())).build();
+//    }
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.csrf(ServerHttpSecurity.CsrfSpec::disable) // Using the Consumer functional interface to disable CSRF
+        return http
+                .csrf(ServerHttpSecurity.CsrfSpec::disable) // 禁用 CSRF
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/eureka/**").permitAll() // Permit all requests to "/eureka/**"
-                        .anyExchange().authenticated() // All other requests must be authenticated
-                ).oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults())).build();
+                        .anyExchange().permitAll() // 允许所有请求，无需身份验证
+                )
+                .build();
     }
+
 }

@@ -8,6 +8,7 @@ import com.ProductAPI.Productservice.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class ProductController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @PostMapping
-    public ResponseEntity<Void> createProduct(@RequestBody ProductRequest productRequest){
+    public ResponseEntity<Void> createProduct(@Valid @RequestBody ProductRequest productRequest){
         try {
             productService.createProduct(productRequest);
             return ResponseEntity.status(HttpStatus.CREATED).build();

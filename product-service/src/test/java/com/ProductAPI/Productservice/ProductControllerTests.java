@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @Testcontainers
 @AutoConfigureMockMvc
-class ProductServiceApplicationTests {
+class ProductControllerTests {
     @Container
     static final MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:4.0.10");
     @Autowired
@@ -45,7 +45,7 @@ class ProductServiceApplicationTests {
         productRepository.save(new Product("1", "iphone13", "iphone13", BigDecimal.valueOf(99.99)));
     }
     @Test
-    void shouldCreateProduct() throws Exception {
+    void controller_shouldCreateProduct() throws Exception {
         ProductRequest productRequest = getProductRequest();
         String productRequestJson = null;
 
@@ -72,7 +72,7 @@ class ProductServiceApplicationTests {
     }
     //Testing get product
     @Test
-    void shouldGetProduct() throws Exception {
+    void controller_shouldGetAllProduct() throws Exception {
         Product expectedProduct = new Product("1", "iphone13", "iphone13", BigDecimal.valueOf(99.99));
         String expectedJson = objectMapper.writeValueAsString(expectedProduct);
         mockMvc.perform(MockMvcRequestBuilders.get("/api/product"))
@@ -80,6 +80,17 @@ class ProductServiceApplicationTests {
                 .andExpect(jsonPath("$.[0].name", is("iphone13")))
                 .andExpect(jsonPath("$.[0].description", is("iphone13")))
                 .andExpect(jsonPath("$.[0].price", is(99.99)));
+    }
+
+    @Test
+    void controller_TestNullName() throws Exception{
+        ProductRequest productRequest = ProductRequest.builder()
+                .name("").description("11").price(BigDecimal.valueOf(100.0)).build();
+        String productRequestJson = null;
+        productRequestJson = objectMapper.writeValueAsString(productRequest);
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/product").contentType(MediaType.APPLICATION_JSON)
+                .content(productRequestJson)).andExpect(status().isBadRequest());
+
     }
 
 
